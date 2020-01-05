@@ -54,7 +54,31 @@ RUN yum install -y --disableplugin=subscription-manager hostname procps \
 VOLUME ${NEXUS_DATA}
 
 EXPOSE 8081
-USER nexus
+####USER nexus
+ENV PUID=${PUID:-200}
+ENV PGID=${PGID:-200}
+
+RUN groupmod -o -g "${PGID}" nexus
+RUN usermod -o -u "${PUID}" nexus
+
+
+RUN echo "
+-------------------------------------
+GID/UID
+-------------------------------------
+User uid:    $(id -u nexus)
+User gid:    $(id -g nexus)
+-------------------------------------
+"
+RUN chown nexus:nexus /app
+RUN chown nexus:nexus /config
+RUN chown nexus:nexus /defaults
+RUN chown nexus:nexus ${SONATYPE_DIR}
+RUN chown nexus:nexus ${NEXUS_HOME}
+RUN chown nexus:nexus ${NEXUS_DATA}
+RUN chown nexus:nexus ${NEXUS_CONTEXT}
+RUN chown nexus:nexus ${SONATYPE_WORK}
+####USER nexus
 
 ENV INSTALL4J_ADD_VM_PARAMS="-Xms1200m -Xmx1200m -XX:MaxDirectMemorySize=2g -Djava.util.prefs.userRoot=${NEXUS_DATA}/javaprefs"
 
